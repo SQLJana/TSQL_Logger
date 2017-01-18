@@ -16,7 +16,7 @@ GO
 
 
 
---Our (advanced! NOT) version involves a bit more
+--This (advanced?!) version involves a bit more
 --View the tables/procedures/linked server and views involved
 
 
@@ -219,6 +219,8 @@ SELECT * FROM Logging.Log ORDER BY LogId DESC;
 --Notice the DatabaseName column has always been filled for us anyway!
 
 
+
+
 WAITFOR DELAY '00:01'		-- wait for 1 minute
 GO
 
@@ -296,6 +298,8 @@ WHERE LogId IN (SELECT TOP 2 LogId
 
 --EndLog closes out the log entry to record end-time and duration
 EXEC Util.Logging.EndLog @LogId = @LogId
+
+
 
 --Notice these columns - LogDate,EndDateTime,DurationMilliseconds, RowsAffected 
 SELECT AdditionalInfo, LogDate,EndDateTime,DurationMilliseconds, RowsAffected, *

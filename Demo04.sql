@@ -32,7 +32,7 @@ GO
         SET @Tag = REPLACE(@Tag, '<<RUNSEQUENCENUMBER>>', LTRIM(STR(99999)));
  
         SET @Msg = 'Fetch/decide on values for decision making variables!'
-        EXEC StartLog @Tag = @Tag, @ObjectID = @@PROCID, @LogType = 'STEO', @AdditionalInfo = @Msg, @LogId = @LogId OUTPUT     --Log procedure start
+        EXEC StartLog @Tag = @Tag, @ObjectID = @@PROCID, @LogType = 'STEP', @AdditionalInfo = @Msg, @LogId = @LogId OUTPUT     --Log procedure start
         ------------------------ End: Tag ------------------------  
  
         --At this point, you can select the log entry from Log where
@@ -46,6 +46,10 @@ GO
 		EXEC Logging.EndLog @LogId = @LogId
     --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  
+
+
+	--Let us look at the xml data in the Log table
+	SELECT Tag, * FROM Logging.Log ORDER BY LogId DESC;
  
  
  
@@ -74,6 +78,9 @@ GO
                                     '</MonthlyRetroRun>'
         WHERE LogId = (SELECT MAX(LogId) FROM Logging.Log);
  
+
+
+
         SELECT r.value('RunNumber[1]','INT') AS RunNumber,
                 r.value('ReportToDate[1]','DateTime') AS ReportToDate, 
 				l.*
@@ -85,7 +92,7 @@ GO
  
 
 
- --Let us look at the raw data
+ --Let us look at the raw data once more
  SELECT *
  FROM Logging.Log
  ORDER BY LogId DESC;
@@ -192,6 +199,9 @@ GO
 			EXEC #LoggingTestProcBare
         END
         GO
+
+
+
  
         -------------------------------------------------------------------------------------------------------------
  
@@ -305,6 +315,9 @@ GO
         GO
  
 
+
+
+
  
         IF object_id('TEMPDB.DBO.#LoggingTestProcBare') IS NOT NULL
             DROP PROCEDURE #LoggingTestProcBare;
@@ -344,10 +357,7 @@ GO
         --Select from the log to show what was logged
         SELECT * FROM Log ORDER BY 1 DESC
  
-		DROP PROCEDURE #LoggingTestProcBare;
-        DROP PROCEDURE #LoggingTestProc;
-        DROP PROCEDURE #MainProc;
- 
+	
     --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  
 
@@ -368,6 +378,29 @@ GO
 
 
 
+		--Note down the latest LogId entry value...ane let us run all this inside a transaction that gets rolled back!
+
+		BEGIN TRANSACTION
+
+		EXEC #MainProc
+		
+		ROLLBACK;
+
+
+
+        --Select from the log to show what was logged
+        SELECT * FROM Log ORDER BY 1 DESC
+ 
+
+		--Notice that we still have the logs even through we ran the whole procedure with a txn that was rolled back
+
+
+ 		DROP PROCEDURE #LoggingTestProcBare;
+        DROP PROCEDURE #LoggingTestProc;
+        DROP PROCEDURE #MainProc;
+ 
+
+
 
  
 WAITFOR DELAY '00:01'		-- wait for 1 minute
@@ -375,7 +408,7 @@ GO
 
 
 
-
+SELECT * FROM Logging.LogAppMaster
 
 ------------------------------------------------------------------------------------------------------
 
@@ -383,8 +416,7 @@ GO
 UPDATE Logging.LogAppMaster
 SET IsOn = 0
 WHERE AppContextInfo = '[DEFAULT]';
-
-
+GO
 
 --What is our latest log entry now?
 SELECT MAX(LogId) AS MaxLogId

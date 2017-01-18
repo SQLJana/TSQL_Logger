@@ -99,6 +99,8 @@ SET CONTEXT_INFO @AppContextInfo
 --Register start
 EXEC StartLog @ObjectID = @@PROCID, @AdditionalInfo = @Msg, @LogId = @LogId OUTPUT;     
  
+
+
 --Take a look that log entry's AppContextInfo column!
 SELECT AppContextInfo, AdditionalInfo, * FROM Log WHERE LogId = @LogId;
 
