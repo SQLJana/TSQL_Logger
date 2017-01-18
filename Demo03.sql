@@ -383,3 +383,8 @@ SET LogAutonomously = 1
 WHERE AppContextInfo = '[DEFAULT]';
 
 
+
+
+
+
+DROP TABLE TxnTest;
